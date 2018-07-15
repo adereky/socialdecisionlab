@@ -40,8 +40,11 @@ def render_home():
 @app.route('/download/<path:path>',methods=['GET'])
 @basic_auth.required
 def render_download(path):
-    contents = os.listdir(os.path.join('data','csv',path))
-    return render_template('download.html',contents=contents,dir=path)
+    homepath = os.path.join('data','csv')
+    contents = [os.path.join(path,i) for i in os.listdir(os.path.join(homepath,path)) if i[0]!='.']
+    files = [i for i in contents if os.path.isfile(os.path.join(homepath,i))]
+    folders = [i for i in contents if not os.path.isfile(os.path.join(homepath,i))]
+    return render_template('download.html',folders=folders,files=files,dir=path)
 
 @app.route('/file/<path:path>',methods=['GET'])
 @basic_auth.required

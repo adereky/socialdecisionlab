@@ -10,8 +10,11 @@
     <p><a href='/download/'>Home</a></p>
     <b>Content:</b>
     <ul>
-      {% for item in contents %}
-        <li><a href='/file/{{ item }}'>{{ item }}</a></li>
+      {% for folder in folders %}
+        <li><a href='/download/{{ folder }}/'>{{ folder }}/</a></li>
+      {% endfor %}
+      {% for file in files %}
+        <li><a href='/file/{{ file }}'>{{ file }}</a></li>
       {% endfor %}
     </ul>
     <p><a href='/zipped/{{ dir }}'>Download Zip</a></p>
