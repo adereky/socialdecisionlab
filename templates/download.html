@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>SDL Downloads</title>
+</head>
+
+<body>
+  <div>
+    <h1>SDL Downloads</h1>
+    <p><a href='/download/'>Home</a></p>
+    <b>Content:</b>
+    <ul>
+      {% for item in contents %}
+        <li><a href='/file/{{ item }}'>{{ item }}</a></li>
+      {% endfor %}
+    </ul>
+    <p><a href='/zipped/{{ dir }}'>Zip contents</a></p>
+  </div>
+</body>
+</html>
