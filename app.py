@@ -1,11 +1,16 @@
-import json, os, binascii
+import json, os, binascii, platform
 from datetime import datetime
 from flask import Flask, send_from_directory, request
 from flask_basicauth import BasicAuth
 
 app  = Flask(__name__)
-app.config['BASIC_AUTH_USERNAME'] = os.environ['SDL_AUTH_USER']
-app.config['BASIC_AUTH_PASSWORD'] = os.environ['SDL_AUTH_PWD']
+
+if platform.system() == 'linux':
+    app.config['BASIC_AUTH_USERNAME'] = os.environ['SDL_AUTH_USER']
+    app.config['BASIC_AUTH_PASSWORD'] = os.environ['SDL_AUTH_PWD']
+else:
+    app.config['BASIC_AUTH_USERNAME'] = 'test'
+    app.config['BASIC_AUTH_PASSWORD'] = 'test'
 
 basic_auth = BasicAuth(app)
 
@@ -13,14 +18,17 @@ basic_auth = BasicAuth(app)
 def save():
     timestr = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
     unique_id = binascii.hexlify(os.urandom(16))
-    post = json.loads(request.data)
-    jsonStrings = request.data.get('dataAsJSON')
-    csvStrings = request.data.get('csvStrings')
+    post = json.loads(request.get_data())
+    jsonStrings = post.get('dataAsJSON')
+    csvStrings = post.get('csvStrings')
+    for folder in ['data/json/','data/csv/']:
+        if not os.path.isdir(folder):
+            os.makedirs(folder)
     for i,string in enumerate(jsonStrings):
-        with open(os.path.join('json',timestr+'_'+unique_id+'_'+str(i)+'.json'),'w') as f:
+        with open(os.path.join('data','json',timestr+'_'+unique_id+'_'+str(i)+'.json'),'w') as f:
             f.write(string)
     for i,string in enumerate(jsonStrings):
-        with open(os.path.join('csv',timestr+'_'+unique_id++'_'+str(i)+'.csv'),'w') as f:
+        with open(os.path.join('data','csv',timestr+'_'+unique_id+'_'+str(i)+'.json'),'w') as f:
             f.write(string)
     return json.dumps({'success':True})
 

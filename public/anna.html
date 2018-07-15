@@ -169,15 +169,14 @@
           var csvStrings = [jsPsych.data.dataOfTypeAsCSV('anna'),getUserDataAsCSV()]
           $.ajax({
             type: 'post',
-            cache: false,
             async: false,
             url: './save',
-            data: {
+            data: JSON.stringify({
               subjectID: [Experiment.session.UID,Experiment.session.sessionID,Experiment.session.sessionCode].join('-'),
               folder: jsPsych.data.getURLVariable('f'),
               csvStrings: csvStrings,
               dataAsJSON: [jsPsych.data.dataAsJSON(),JSON.stringify(Experiment.session)]
-            },
+            }),
             success : function(callback=None){
               Experiment.utils.isDataSaved = true
               console.log('Data saved.');
