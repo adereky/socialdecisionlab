@@ -63,7 +63,7 @@
           $.ajax({
             type: 'post',
             cache: false,
-            url: './appendNotifJob.php',
+            url: './appendNotifJob',
             data: {
               notifJob : notifJob
             }
@@ -171,7 +171,7 @@
             type: 'post',
             cache: false,
             async: false,
-            url: './store2.php',
+            url: './save',
             data: {
               subjectID: [Experiment.session.UID,Experiment.session.sessionID,Experiment.session.sessionCode].join('-'),
               folder: jsPsych.data.getURLVariable('f'),
