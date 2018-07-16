@@ -15,6 +15,10 @@ else:
 
 basic_auth = BasicAuth(app)
 
+@app.route('/',methods=['GET'])
+def home():
+    return render_template('index.html')
+
 @app.route('/save',methods=['POST'])
 def save():
     timestr = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
