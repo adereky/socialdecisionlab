@@ -22,14 +22,15 @@ def save():
     post = json.loads(request.get_data())
     jsonStrings = post.get('dataAsJSON')
     csvStrings = post.get('csvStrings')
-    for folder in ['data/json/','data/csv/']:
-        if not os.path.isdir(folder):
-            os.makedirs(folder)
+    folder = post.get('folder','')
+    for dir in ['data/json/','data/csv/'+folder]:
+        if not os.path.isdir(dir):
+            os.makedirs(dir)
     for i,string in enumerate(jsonStrings):
         with open(os.path.join('data','json',timestr+'_'+unique_id+'_'+str(i)+'.json'),'w') as f:
             f.write(string)
-    for i,string in enumerate(jsonStrings):
-        with open(os.path.join('data','csv',timestr+'_'+unique_id+'_'+str(i)+'.json'),'w') as f:
+    for i,string in enumerate(csvStrings):
+        with open(os.path.join('data','csv',folder,timestr+'_'+unique_id+'_'+str(i)+'.csv'),'w') as f:
             f.write(string)
     return json.dumps({'success':True})
 
