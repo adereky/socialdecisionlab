@@ -5,3 +5,4 @@ An online experiment by Anna Dereky at [TIMGROUP (ETHZ)](http://www.timgroup.eth
 
 ## To Do's
 * Hourly Notif Job
+* Download Debug
