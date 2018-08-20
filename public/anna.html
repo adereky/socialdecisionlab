@@ -31,11 +31,12 @@
       });
       return devals
     };
-// wir schreiben einen kommentar.
+
+    // wir schreiben einen kommentar.
     var Experiment = {
       utils : {
         setIpAddress : function(){
-          Experiment.session.ipAddress = remoteIp
+          Experiment.session.ipAddress = remoteIp || 'None';
         },
         displayConfCode : function(){
           var htmlStr = [Experiment.session.sessionCode,Experiment.settings.generalSessionCodes[Experiment.session.sessionID-1]].join('-');
