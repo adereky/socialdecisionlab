@@ -36,7 +36,8 @@
     var Experiment = {
       utils : {
         setIpAddress : function(){
-          Experiment.session.ipAddress = remoteIp || 'None';
+          var remoteIp = remoteIp || 'None';
+          Experiment.session.ipAddress = remoteIp;
         },
         displayConfCode : function(){
           var htmlStr = [Experiment.session.sessionCode,Experiment.settings.generalSessionCodes[Experiment.session.sessionID-1]].join('-');
