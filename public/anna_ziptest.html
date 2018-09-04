@@ -1,0 +1,659 @@
+<!doctype html>
+<html lang="de">
+    <head>
+      <meta charset="utf-8"/>
+        <title>Timgroup: Experiment 1</title>
+        <script src="./jquery.min.js"></script>
+        <script src="./jszip.min.js"></script>
+        <script src="./jspsych.js"></script>
+        <script src="./plugins/jspsych-instructions.js"></script>
+        <script src="./plugins/jspsych-fullscreen.js"></script>
+        <script src="./plugins/jspsych-anna.js"></script>
+        <script src="./plugins/jspsych-savezip.js"></script>
+        <script src="./guiInfo.js"></script>
+        <script src="./userInfo.js"></script>
+        <script src="./imgData.js"></script>
+        <script src="./timeline.js"></script>
+        <script src="./instructions.js"></script>
+        <!-- <script type="text/javascript" src="https://www.l2.io/ip.js?var=remoteIp"></script> -->
+        <link href="./css/jspsych.css" rel="stylesheet" type="text/css"></link>
+    </head>
+    <script>
+
+    var nTrialsPerSession = {
+        1 : 280, 2 : 280, 3 : 280, 4 : 500, 5 : 110
+    };
+
+    var getDevalImg = function(){
+      var devals = jsPsych.randomization.sample(imgData.regular,4)
+      var positions = jsPsych.randomization.shuffle(['h','h','v','v'])
+      devals.map(function(i,val){
+        val.position = positions[i];
+        return val
+      });
+      return devals
+    };
+
+    // wir schreiben einen kommentar.
+    var Experiment = {
+      utils : {
+        setIpAddress : function(){
+          var remoteIp = remoteIp || 'None';
+          Experiment.session.ipAddress = remoteIp;
+        },
+        displayConfCode : function(){
+          var htmlStr = [Experiment.session.sessionCode,Experiment.settings.generalSessionCodes[Experiment.session.sessionID-1]].join('-');
+          $('#conf_code').html(htmlStr);
+          urlData = jsPsych.data.urlVariables()
+          if(Object.keys(urlData).indexOf('n')> -1){
+            var htmlStr = '<p>If you wish to be notified by email, when your next experiment session is available, insert you email here:  \
+            <input id="notifInput" type="text" size="40"/> \
+            <button id="notifButton" onclick="Experiment.utils.addMailToSchedule()">Notify me</button>';
+            $('#notification').html(htmlStr);
+          };
+        },
+        addMailToSchedule : function(){
+          var notifMail = $('#notifInput').val();
+          if(!this.validateEmail(notifMail)){
+            alert('Please insert a valid email address.')
+            return
+          };
+          var hours = parseInt(jsPsych.data.urlVariables()['n']);
+          var t = new Date();
+          var off = t.getTimezoneOffset()+60;
+          t.setTime(Date.now()+(off*60*1000)+(hours*60*60*1000)-jsPsych.data.getLastTrialData()['time_elapsed']);
+
+          var notifJob = ['0',t.toString(),notifMail].join('\t ')+'\n';
+          $.ajax({
+            type: 'post',
+            cache: false,
+            url: './appendNotifJob',
+            data: {
+              notifJob : notifJob
+            }
+          });
+          $('#notification').remove();
+        },
+        validateEmail : function (email) {
+          var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+          return re.test(email);
+        },
+        displayStr : function(str){
+          $('#fsDiv').html(str);
+        },
+        wrap : function(p,top){
+          var divStyle = Experiment.settings.contentDivStyle;
+          if (typeof top != 'undefined'){divStyle=divStyle+'top:'+top+'px;'};
+          var divStart = "<div id='content' style='"+divStyle+"'>"
+          if (typeof p == 'string'){
+            var t = divStart+p+'</div>';
+          }else{
+            var t = [];
+            for (i=0;i<p.length;i++){
+              t.push(divStart+p[i]+'</div>');
+            };
+          };
+          return t;
+        },
+        getBrowserInfo : function(){
+          var ua=navigator.userAgent,tem,M=ua.match(/(opera|chrome|safari|firefox|msie|trident(?=\/))\/?\s*(\d+)/i) || [];
+          if(/trident/i.test(M[1])){
+              tem=/\brv[ :]+(\d+)/g.exec(ua) || [];
+              return {name:'IE',version:(tem[1]||'')};
+              }
+          if(M[1]==='Chrome'){
+              tem=ua.match(/\bOPR\/(\d+)/)
+              if(tem!=null)   {return {name:'Opera', version:tem[1]};}
+              }
+          M=M[2]? [M[1], M[2]]: [navigator.appName, navigator.appVersion, '-?'];
+          if((tem=ua.match(/version\/(\d+)/i))!=null) {M.splice(1,1,tem[1]);}
+          return {
+            name: M[0],
+            version: M[1]
+          }
+        },
+        checkBrowser : function(){
+
+          var b = Experiment.utils.getBrowserInfo();
+          var acceptedBrowsers = {
+            'Firefox': 43,
+            'Chrome': 45,
+            'Safari': 8
+          };
+
+          if(Object.keys(acceptedBrowsers).indexOf(b.name) == -1){
+            $('body').html('<h4>You must either use Chrome, Firefox or Safari to take part in this experiment.</h4>');
+            console.log(b);
+            throw new Error('Experiment aborted due to invalid browser.');
+          }else if(b.version < acceptedBrowsers[b.name]){
+            $('body').html('<h4>The browser version is too outdated for this experiment. Please update your browser and try again.</h4>');
+            console.log(b);
+            throw new Error('Experiment aborted due to unaccepted browser.');
+          }
+        },
+        backgroundDiv : function(){
+          var fsDiv = "<div id='fsDiv' style='background-color:rgb(140,140,140);text-algin:center;position:absolute;"+
+                      "height:"+screen.height.toString()+"px;width:"+screen.width.toString()+"px;margin:0px;'>"+
+                      "</div>";
+          var progressHtml = "<div class='progress' style='position:absolute;left:"+((screen.width*.5)-123)+"px;'><div id='jspsych-progressbar-outer'><div id='jspsych-progressbar-inner'></div></div></div>";
+
+          $('body').html(fsDiv);
+          $('body').append(progressHtml);
+          $('#jspsych-progressbar-outer').css('font-size','7px');
+          $('#jspsych-progressbar-outer').css('width','250px');
+          $('#jspsych-progressbar-inner').css('background-color','rgb(140,140,140)');
+        },
+        startJsPsych : function(){
+          //reset progressbar and set at bottom
+          $('.progress').css('top',(screen.height-60).toString()+'px');
+          $('#jspsych-progressbar-inner').css('width','0%');
+
+          var timeline = Experiment.timeline.init();
+          jsPsych.init({
+            display_element: $('#fsDiv'),
+            timeline: timeline
+          });
+        },
+        getExperimentCSVData:function(){
+          Experiment.session.sessionEnd = new Date().toString().replace(',','');
+          function getUserDataAsCSV(){
+            var keys = Object.keys(Experiment.session);
+            var header = '';
+            var dataStr = '';
+            var info = Experiment.session;
+
+            for (i=0;i<keys.length;i++){
+              var t = typeof info[keys[i]] == 'object' ? info[keys[i]].join('') : info[keys[i]];
+              header= i>0 ? header+','+keys[i] : keys[i];
+              dataStr= i>0 ? dataStr+','+t : t;
+            }
+            dataStr = header+'\n'+dataStr+'\n';
+            return dataStr
+          };
+          var csvStrings = [jsPsych.data.dataOfTypeAsCSV('anna'),getUserDataAsCSV()];
+          return csvStrings;
+        },
+        saveZip:function(){
+          var csvStrings = Experiment.utils.getExperimentCSVData()
+          var zip = new JSZip();
+          var root = zip.folder("socialdecisionlab");
+          root.file("ReadMe.txt", "Please send this folder to adereky@ethz.ch\n");
+          var folder = jsPsych.data.getURLVariable('f')
+          var exp_folder = root.folder(folder);
+          var fileName = [Experiment.session.UID,Experiment.session.sessionID,Experiment.session.sessionCode].join('-')
+          exp_folder.file(fileName+"_0.csv", csvStrings[0]);
+          exp_folder.file(fileName+"_1.csv",  csvStrings[1]);
+          zip.generateAsync({type:"base64"}).then(function (base64) {
+            window.location = "data:application/zip;base64," + base64;
+          })
+          // .then(function(content) {
+          //     // see FileSaver.js
+          //     saveAs(content, "ExperimentData_SDL.zip");
+          // });
+        },
+        sendData:function(){
+          $.ajax({
+              type: 'post',
+              url: './save',
+              data: JSON.stringify({
+                subjectID: [Experiment.session.UID,Experiment.session.sessionID,Experiment.session.sessionCode].join('-'),
+                folder: jsPsych.data.getURLVariable('f'),
+                csvStrings: Experiment.utils.getExperimentCSVData(),
+                dataAsJSON: [jsPsych.data.dataAsJSON(),JSON.stringify(Experiment.session)]
+              }),
+              success : function(callback=None){
+                Experiment.utils.isDataSaved = true
+              }
+            });
+        },
+        loadImgsAndStartExperiment : function(){
+          Experiment.img.init()
+          if(Experiment.img.loadedStatus == 'not loaded'){
+            setTimeout(Experiment.utils.loadForImgsAndStartExperiment,1000);
+          }else{
+            Experiment.utils.startJsPsych()
+          };
+        },
+        flattenJSON : function(data) {
+          var result = {};
+          function recurse (cur, prop) {
+              if (Object(cur) !== cur) {
+                  result[prop] = cur;
+              } else if (Array.isArray(cur)) {
+                   for(var i=0, l=cur.length; i<l; i++)
+                       recurse(cur[i], prop + "[" + i + "]");
+                  if (l == 0)
+                      result[prop] = [];
+              } else {
+                  var isEmpty = true;
+                  for (var p in cur) {
+                      isEmpty = false;
+                      recurse(cur[p], prop ? prop+"."+p : p);
+                  }
+                  if (isEmpty && prop)
+                      result[prop] = {};
+              }
+          }
+          recurse(data, "");
+          return result;
+        },
+        sleep: function(ms) {
+          return new Promise(resolve => setTimeout(resolve, ms));
+        },
+        isDataSaved : false,
+      },
+      settings : {
+        // new settings introduced may 4th 2016
+        values : [[60,50,30,70],[70,40,30,70],[70,60,60,80],[80,30,50,80],[70,50,50,80],[60,40,50,80],[60,70,50,60]],
+        contentDivStyle : 'position:absolute;width:800px;left:'+
+                          +((screen.width-800)/2).toString()+'px;',
+        buttonStyle : 'height:60px;width:90px;float:right;font-size:12px;font-weight:bold;margin-top:100px;',
+        nTrials: parseInt(jsPsych.data.getURLVariable('nTrials')) || nTrialsPerSession[jsPsych.data.getURLVariable('s')],
+        generalSessionCodes : ['1vd9r1vhu4yv','0reb2suc8jbl','ypy73dyx4lg5','zo51u9vqj4yw','h9g75ro00e3t']
+      },
+      url : {
+        urlHasInfo : function(){
+          var mandKeys = ['i','c','a','m','ch','r','s','f'];
+          var urlData = jsPsych.data.urlVariables();
+          for (var i =0;i<mandKeys.length;i++){
+            if (Object.keys(urlData).indexOf(mandKeys[i]) == -1 || urlData[mandKeys[i]] == ''){
+              return false
+            };
+          };
+          return true
+        },
+        getUserInfo : function(){
+          var urlData = jsPsych.data.urlVariables();
+          var charityMap = {
+            1 : 'WWF',
+            2 : 'Greenpeace',
+            3 : 'Declaration of Bern',
+            4 : 'Amnesty International',
+            7 : 'Caritas',
+            8 : 'Terres des Hommes',
+            9 : 'Unicef',
+            10 : 'Medecins sans Frontieres'
+          };
+          var browser = Experiment.utils.getBrowserInfo();
+
+          var userData = {
+            UID : urlData.i,
+            arrowcode : urlData.a.split('').map(function(i){return parseInt(i)}),
+            colorcode : urlData.c.split('').map(function(i){return parseInt(i)}),
+            mefirst : parseInt(urlData.m),
+            charity : isNaN(urlData.ch) ? urlData.ch : charityMap[parseInt(urlData.ch)] ,
+            responseID : urlData.r,
+            sessionID : parseInt(urlData.s),
+            sessionCode : jsPsych.randomization.randomID(12),
+            sessionStart : new Date().toString().replace(',',''),
+            browserName : browser.name,
+            browserVersion : browser.version
+          };
+          return userData
+        },
+        getSessionVars : function(){
+          if (this.urlHasInfo()){
+            inf = this.getUserInfo();
+            jsPsych.data.addProperties({UID:inf.UID,sessionID:inf.sessionID});
+            return inf;
+          }else{
+            var str = '<p>This URL is invalid. Please try to reopen the link from qualtrics again.<br>If the problem still occurs please contact Anna Dereky at adereky(at)ethz.ch.</p>';
+            $('body').html(Experiment.utils.wrap(str,150));
+            throw new Error('Experiment aborted due to invalid link.');
+          };
+        }
+      },
+      img : {
+        regular : {
+          items : function(){
+            var t = imgData.regular;
+            var horiz = jsPsych.randomization.repeat(['v','h'],imgData.regular.length/2)
+            t.map(function(val,i){
+              val.position = horiz[i];
+              return val
+            })
+            return t
+          }(),
+          shuffled : function(){
+            return jsPsych.randomization.shuffle(this.items);
+          },
+          paths : function(){
+            return this.items.map(function(i){
+              return i['path'];
+            });
+          }
+        },
+        fractals : {
+          items : imgData.fractals.map(function(val,i){
+            position = ['v','h','v','h','v','h','v'];
+            val.position = position[i];
+            return val
+          }),
+          paths : function(){
+            return this.items.map(function(i){
+              return i['path'];
+            });
+          }
+        },
+        deval : {
+          items : getDevalImg(),
+          paths : function(){
+            return this.items.map(function(i){
+              return i['path'];
+            });
+          }
+        },
+        preLoadImages : function(callback){
+          //reset progressbar and set at bottom
+          $('#fsDiv').append(Experiment.utils.wrap('<p><center>Loading Session. This might take a while.</center></p>',screen.height*.5));
+          $('.progress').css('top',(screen.height*.5+60).toString()+'px');
+          $('#jspsych-progressbar-inner').css('width','0%');
+
+          imgSelection = [
+            this.fractals.paths(),
+            this.fractals.paths(),
+            this.fractals.paths(),
+            this.regular.paths().concat(this.fractals.paths()),
+            this.fractals.paths().concat(this.deval.paths())
+          ];
+          var imgPaths = imgSelection[Experiment.session.sessionID-1];
+
+          this.t0=Date.now();
+          jsPsych.pluginAPI.preloadImages(
+            imgPaths,
+            function(){
+              $('#content').remove();
+              Experiment.utils.startJsPsych()},
+            function(i){
+              nImgs = imgPaths.length;
+              $('#jspsych-progressbar-inner').css('width',(i/nImgs*100).toString()+'%');
+            }
+          );
+        },
+        imagesLoaded : function(t0){
+          var t1 = (Date.now()-this.t0)/1000.0;
+          this.loadedStatus = "loaded";
+        },
+        init : function(){
+          this.loadedStatus = 'not loaded';
+          this.preLoadImages();
+        }
+      },
+      timeline : {
+        enter_fullscreen_block : function(){
+          var html = Experiment.utils.wrap(instructions.welcome,(screen.height*.5)-300);
+          var buttonStyle = Experiment.settings.buttonStyle;
+          var b={
+            type: 'fullscreen',
+            html: html,
+            buttonStyle : buttonStyle,
+            buttontext: "Enter",
+            visibility: true,
+            on_fullscreen_abort: function(){
+              jsPsych.finishTrial();
+              jsPsych.endExperiment('The experiment was terminated due to fullscreen abort. Please reopen the link from qualtrics.');
+            },
+            on_fullscreen_fail: function(){
+              jsPsych.finishTrial();
+              jsPsych.endExperiment('Your browser doesn\'t provide the necessary functionality. We recommend \
+              using an up-to-date version of Firefox or Chrome.');
+            },
+            on_visibility_abort:function(){
+              jsPsych.finishTrial();
+              jsPsych.endExperiment('The experiment was terminated due to lack of visibility of the window. Please reopen the link from qualtrics.');
+            },
+            on_visibility_fail:function(){
+              jsPsych.finishTrial();
+              jsPsych.endExperiment('Your browser doesn\'t provide the necessary functionality. We recommend \
+              using an up-to-date version of Firefox or Chrome.');
+            },
+            on_finish : function(){
+              $('#fsDiv').css({'height':screen.height,'width':screen.width});
+            }
+          };
+          return b
+        },
+        exit_fullscreen_block : function(){
+          var html = Experiment.utils.wrap(instructions.end_fullscreen,(screen.height*.5)-250);
+          var buttonStyle = Experiment.settings.buttonStyle;
+          var b = {
+            type : 'fullscreen',
+            exit : true,
+            buttonStyle : buttonStyle,
+            buttontext: "Save & Exit",
+            html : html
+          };
+          return b;
+        },
+        saveZip_block: function(){
+          return {
+            type:'savezip',
+            buttonStyle : Experiment.settings.buttonStyle,
+          }
+        },
+        confirmation_block : function(){
+
+          page = Experiment.utils.wrap( instructions.confirmation ,100)
+          b = {
+            type : 'instructions',
+            pages : [page],
+            on_trial_start : function(){
+              setTimeout(Experiment.utils.displayConfCode,200);
+            }
+          };
+          return b;
+        },
+        anna_block : function(){
+          var values =  Experiment.settings.values;
+          var colorcode = Experiment.session.colorcode;
+          var arrowcode = Experiment.session.arrowcode;
+          var mefirst = Experiment.session.mefirst;
+          var arrowswitch = [2,3,0,1];
+          var mefirstswitch = [1,0,3,2];
+
+          var getColorindex = function(){
+            var colorindex = [];
+            if (Experiment.session.sessionID==1){
+              orig = [0,0,0,0,0,0,0,0,0,0];
+              colorindex = orig;
+              for (i=0;i<6;i++){colorindex =  orig.concat(colorindex.map( function(x) {return(x + 1)})); };
+            }
+            var addNTrials = Experiment.session.sessionID == 1 ? 30 : 40;
+            var tempindex = [];
+            for (t=0;t<7;t++){
+              for(j=0;j<addNTrials;j++){
+                tempindex.push(t);
+              };
+            };
+            colorindex = colorindex.concat(jsPsych.randomization.shuffle(tempindex));
+            return colorindex;
+          };
+
+          var getTrainingItems = function(){
+
+            var colorindex = getColorindex();
+            var fractals = Experiment.img.fractals.items;
+
+            var items = colorindex.map(function(i){
+              var valueversion = colorcode[i];
+              var arrowversion = arrowcode[i];
+              if (arrowversion == 0){
+                var vals = values[valueversion];
+              }else{
+                var vals = values[valueversion];
+                vals = vals.map(function(val,j){return vals[arrowswitch[j]]})
+              };
+              dispVals = mefirst == 1 ? vals : vals.map(function(val,j){return vals[mefirstswitch[j]]});
+
+              var n = {
+                c : [i],
+                v : [valueversion],
+                a : [arrowversion],
+                condition : 'T',
+                arrangement : [2],
+                combination : [valueversion+1],
+                imgs : [fractals[i]],
+                p : [vals],
+                d : [dispVals],
+                m : mefirst,
+                isfoil  : 0
+              }
+              return n
+            });
+            return items
+          };
+
+          var getExpItems = function(){
+
+            var fractals = Experiment.img.fractals.items;
+
+            var regularImgShuffled = Experiment.img.regular.shuffled();
+            var items = jsPsych.randomization.shuffle(timeline);
+
+            //make structure uniform
+            items = items.map(function(i){
+              if (typeof i.arrangement != 'object'){
+                i.arrangement = [i.arrangement]
+              };
+              if (typeof i.combination != 'object'){
+                i.combination = [i.combination]
+              };
+              return i
+            });
+
+            var regIdx = 0;
+            items = items.map(function(i){
+              //distribute images
+              i.imgs = [];
+              i.m = mefirst;
+              i.c = [-1,-1];
+              i.v = [-1,-1];
+              i.a = [-1,-1];
+              i.p = i.arrangement.length == 2 ? [i.p.slice(0,4),i.p.slice(4,8)] : [i.p.slice(0,4)];
+              i.d = [];
+              for(j=0;j<i.arrangement.length;j++){
+                if(i.arrangement[j]==1||i.isfoil==1){
+                  i.imgs[j] = regularImgShuffled[regIdx];
+                  regIdx++
+                }else{
+                  var valueversion = i.combination[j] - 1;
+                  var colorversion = colorcode.indexOf(valueversion)
+                  var arrowversion = arrowcode[colorversion]
+                  i.v[j] = valueversion;
+                  i.c[j] = colorversion;
+                  i.a[j] = arrowversion;
+                  i.imgs[j] = fractals[colorversion];
+                  if (arrowversion == 1){
+                    var vals = values[valueversion];
+                    i.p[j] = vals.map(function(val,j){return vals[arrowswitch[j]]})
+                  };
+                };
+                var vals = i.p[j];
+                //for all conditions
+                if (mefirst==0){
+                  vals = vals.map(function(val,j){return vals[mefirstswitch[j]]})
+                }
+                i.d[j]=vals;
+              };
+              return i
+            });
+            console.log(items)
+            return items;
+          };
+
+          var getDevalItems = function(){
+            var fractals = Experiment.img.fractals.items;
+            var regulars = Experiment.img.deval.items;
+
+            var itemsF = []
+            var itemsR = []
+
+            for(i=0;i<fractals.length;i++){
+              var valueversion = colorcode[i];
+              var arrowversion = arrowcode[i];
+              if (arrowversion == 0){
+                var vals = values[valueversion];
+              }else{
+                var vals = values[valueversion];
+                vals = vals.map(function(val,j){return vals[arrowswitch[j]]})
+              };
+              dispVals = mefirst == 1 ? vals : vals.map(function(val,j){return vals[mefirstswitch[j]]});
+
+              var n = {
+                c : [i],
+                v : [valueversion],
+                a : [arrowversion],
+                condition : 'D',
+                arrangement : [3],
+                combination : [3],
+                imgs : [fractals[i]],
+                p : [vals],
+                d : [dispVals],
+                m : mefirst,
+                isfoil  : 0
+              }
+              itemsF.push(n);
+            };
+            for(i=0;i<regulars.length;i++){
+              var n = {
+                c : [-1],
+                v : [-1],
+                a : [-1],
+                condition : 'D',
+                arrangement : [3],
+                combination : [3],
+                imgs : [regulars[i]],
+                p : [[0,0,0,0]],
+                d : [[0,0,0,0]],
+                m : mefirst,
+                isfoil  : 1
+              }
+              itemsR.push(n);
+            };
+
+            var items = itemsF.concat(itemsR)
+            items = jsPsych.randomization.repeat(items,10);
+            items = jsPsych.randomization.shuffle(items);
+            return items;
+
+          }
+
+          var itemFunctions = [getTrainingItems,getTrainingItems,getTrainingItems,getExpItems,getDevalItems];
+          var items = itemFunctions[Experiment.session.sessionID-1].call();
+          items = items.slice(0,Experiment.settings.nTrials)
+
+          b = {
+            type: 'anna',
+            timeline : items,
+            timing_post_trial: 0,
+            sessionNr : Experiment.session.sessionID
+          };
+
+          return b;
+        },
+        init : function(){
+          var timeline  =  [];
+          timeline.push(this.enter_fullscreen_block());
+          timeline.push(this.anna_block());
+          timeline.push(this.exit_fullscreen_block());
+          timeline.push(this.saveZip_block());
+          timeline.push(this.confirmation_block());
+
+          return timeline;
+        }
+      },
+      init : function(){
+        this.utils.checkBrowser();
+        this.session = this.url.getSessionVars();
+        this.utils.setIpAddress();
+        this.utils.backgroundDiv();
+        this.utils.loadImgsAndStartExperiment();
+      }
+    };
+
+    window.onload = function(){
+      Experiment.init()
+    };
+
+    </script>
+</html>

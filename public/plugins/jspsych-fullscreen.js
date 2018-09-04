@@ -194,6 +194,11 @@ jsPsych.plugins['fullscreen'] = (function(){
             fs.removeListener();
             vs.removeListener();
             fs.exit();
+            Experiment.utils.sendData()
+            display_element.html('');
+            setTimeout(function(){
+              jsPsych.finishTrial()
+            },1000)
           }else{
             fs.launch(document.documentElement);
             fs_plugin_glob.fs_abort = fs.getFullScreenAbort(trial.on_fullscreen_abort)
@@ -201,10 +206,10 @@ jsPsych.plugins['fullscreen'] = (function(){
             if (trial.visibility){
                 fs_plugin_glob.vs_abort = vs.getVisibilityAbort(trial.on_visibility_abort);
                 setTimeout(vs.addListener,800);
-              }
-            };
+            }
             display_element.html('');
             jsPsych.finishTrial();
+          };
         });
     };
 
