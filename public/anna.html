@@ -4,10 +4,12 @@
       <meta charset="utf-8"/>
         <title>Timgroup: Experiment 1</title>
         <script src="./jquery.min.js"></script>
+        <script src="./jszip.min.js"></script>
         <script src="./jspsych.js"></script>
         <script src="./plugins/jspsych-instructions.js"></script>
         <script src="./plugins/jspsych-fullscreen.js"></script>
         <script src="./plugins/jspsych-anna.js"></script>
+        <script src="./plugins/jspsych-savezip.js"></script>
         <script src="./guiInfo.js"></script>
         <script src="./userInfo.js"></script>
         <script src="./imgData.js"></script>
@@ -19,7 +21,7 @@
     <script>
 
     var nTrialsPerSession = {
-        1 : 280, 2 : 280, 3 : 280, 4 : 500, 5 : 110
+        1 : 280, 2 : 280, 3 : 280, 4 : 588, 5 : 110
     };
 
     var getDevalImg = function(){
@@ -152,8 +154,8 @@
             timeline: timeline
           });
         },
-        isDataSaved : false,
-        saveData : function(){
+        getExperimentCSVData:function(){
+          Experiment.session.sessionEnd = new Date().toString().replace(',','');
           function getUserDataAsCSV(){
             var keys = Object.keys(Experiment.session);
             var header = '';
@@ -167,29 +169,42 @@
             }
             dataStr = header+'\n'+dataStr+'\n';
             return dataStr
-          }
-          var csvStrings = [jsPsych.data.dataOfTypeAsCSV('anna'),getUserDataAsCSV()]
+          };
+          var csvStrings = [jsPsych.data.dataOfTypeAsCSV('anna'),getUserDataAsCSV()];
+          return csvStrings;
+        },
+        saveZip:function(){
+          var csvStrings = Experiment.utils.getExperimentCSVData()
+          var zip = new JSZip();
+          var root = zip.folder("socialdecisionlab");
+          root.file("ReadMe.txt", "Please send this folder to adereky@ethz.ch\n");
+          var folder = jsPsych.data.getURLVariable('f')
+          var exp_folder = root.folder(folder);
+          var fileName = [Experiment.session.UID,Experiment.session.sessionID,Experiment.session.sessionCode].join('-')
+          exp_folder.file(fileName+"_0.csv", csvStrings[0]);
+          exp_folder.file(fileName+"_1.csv",  csvStrings[1]);
+          zip.generateAsync({type:"base64"}).then(function (base64) {
+            window.location = "data:application/zip;base64," + base64;
+          })
+          // .then(function(content) {
+          //     // see FileSaver.js
+          //     saveAs(content, "ExperimentData_SDL.zip");
+          // });
+        },
+        sendData:function(){
           $.ajax({
-            type: 'post',
-            async: false,
-            url: './save',
-            data: JSON.stringify({
-              subjectID: [Experiment.session.UID,Experiment.session.sessionID,Experiment.session.sessionCode].join('-'),
-              folder: jsPsych.data.getURLVariable('f'),
-              csvStrings: csvStrings,
-              dataAsJSON: [jsPsych.data.dataAsJSON(),JSON.stringify(Experiment.session)]
-            }),
-            success : function(callback=None){
-              Experiment.utils.isDataSaved = true
-              console.log('Data saved.');
-              if(typeof callback != 'undefined'){
-                callback.call()
+              type: 'post',
+              url: './save',
+              data: JSON.stringify({
+                subjectID: [Experiment.session.UID,Experiment.session.sessionID,Experiment.session.sessionCode].join('-'),
+                folder: jsPsych.data.getURLVariable('f'),
+                csvStrings: Experiment.utils.getExperimentCSVData(),
+                dataAsJSON: [jsPsych.data.dataAsJSON(),JSON.stringify(Experiment.session)]
+              }),
+              success : function(callback=None){
+                Experiment.utils.isDataSaved = true
               }
-            },
-            error: function(){
-              alert('Data could not be saved, will try again in 2 seconds.')
-            }
-          });
+            });
         },
         loadImgsAndStartExperiment : function(){
           Experiment.img.init()
@@ -224,7 +239,8 @@
         },
         sleep: function(ms) {
           return new Promise(resolve => setTimeout(resolve, ms));
-        }
+        },
+        isDataSaved : false,
       },
       settings : {
         // new settings introduced may 4th 2016
@@ -405,17 +421,15 @@
             exit : true,
             buttonStyle : buttonStyle,
             buttontext: "Save & Exit",
-            html : html,
-            on_finish : async function(data){
-              Experiment.session.sessionEnd = new Date().toString().replace(',','');
-              Experiment.utils.saveData();
-              while(!Experiment.utils.isDataSaved){
-                await Experiment.utils.sleep(3000)
-                Experiment.utils.saveData()
-              }
-            }
+            html : html
           };
           return b;
+        },
+        saveZip_block: function(){
+          return {
+            type:'savezip',
+            buttonStyle : Experiment.settings.buttonStyle,
+          }
         },
         confirmation_block : function(){
 
@@ -543,7 +557,6 @@
               };
               return i
             });
-
             return items;
           };
 
@@ -622,7 +635,9 @@
           timeline.push(this.enter_fullscreen_block());
           timeline.push(this.anna_block());
           timeline.push(this.exit_fullscreen_block());
+          timeline.push(this.saveZip_block());
           timeline.push(this.confirmation_block());
+
           return timeline;
         }
       },
