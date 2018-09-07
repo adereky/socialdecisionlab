@@ -10,7 +10,7 @@ jsPsych.plugins['savezip'] = (function(){
     var plugin = {};
 
     plugin.trial = function(display_element, trial){
-      if(Experiment.utils.isDataSaved){
+      if(Experiment.utils.isDataSaved || jsPsych.data.getURLVariable('forceZip')=='1'){
         jsPsych.finishTrial();
       }else{
         var html = Experiment.utils.wrap('There was an error sending your data to the server. '+
