@@ -48,6 +48,7 @@ def render_download(path):
     homepath = os.path.join('data','csv')
     contents = [os.path.join(path,i) for i in os.listdir(os.path.join(homepath,path)) if i[0]!='.']
     files = [i for i in contents if os.path.isfile(os.path.join(homepath,i))]
+    files.sort()
     folders = [i for i in contents if not os.path.isfile(os.path.join(homepath,i))]
     return render_template('download.html',folders=folders,files=files,dir=path)
 
