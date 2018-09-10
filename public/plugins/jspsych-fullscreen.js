@@ -194,11 +194,26 @@ jsPsych.plugins['fullscreen'] = (function(){
             fs.removeListener();
             vs.removeListener();
             fs.exit();
-            Experiment.utils.sendData()
             display_element.html('');
-            setTimeout(function(){
-              jsPsych.finishTrial()
-            },1000)
+            $.ajax({
+                type: 'post',
+                url: './save',
+                data: JSON.stringify({
+                  subjectID: [Experiment.session.UID,Experiment.session.sessionID,Experiment.session.sessionCode].join('-'),
+                  folder: jsPsych.data.getURLVariable('f'),
+                  csvStrings: Experiment.utils.getExperimentCSVData(),
+                  dataAsJSON: [jsPsych.data.dataAsJSON(),JSON.stringify(Experiment.session)]
+                }),
+                success : function(){
+                  Experiment.utils.isDataSaved = true;
+                  jsPsych.finishTrial()
+                },
+                error : function(xhr, status, error){
+                  console.log(error)
+                  console.log(xhr.responseText)
+                  jsPsych.finishTrial()
+                }
+              });
           }else{
             fs.launch(document.documentElement);
             fs_plugin_glob.fs_abort = fs.getFullScreenAbort(trial.on_fullscreen_abort)
