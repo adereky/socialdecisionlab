@@ -308,7 +308,7 @@
           items : function(){
             var t = imgData.regular;
             var horiz = jsPsych.randomization.repeat(['v','h'],imgData.regular.length/2)
-            t.map(function(val,i){
+            var t = t.map(function(val,i){
               val.position = horiz[i];
               return val
             })
@@ -509,6 +509,8 @@
 
             var regularImgShuffled = Experiment.img.regular.shuffled();
             var items = jsPsych.randomization.shuffle(timeline);
+            // items = items.filter(function(i){return(i.condition=='P')})
+            // var items = timeline
 
             //make structure uniform
             items = items.map(function(i){
@@ -523,6 +525,14 @@
 
             var regIdx = 0;
             items = items.map(function(i){
+              // hack:
+              // if trained combination has valuepair over 7, then reverse arrangement order
+              if(i.condition=='PT'){
+                var Tidx = i.arrangement.indexOf(2)
+                if (i.combination[Tidx]>7){
+                    i.arrangement = i.arrangement.reverse()
+                }
+              }
               //distribute images
               i.imgs = [];
               i.m = mefirst;
@@ -532,7 +542,7 @@
               i.p = i.arrangement.length == 2 ? [i.p.slice(0,4),i.p.slice(4,8)] : [i.p.slice(0,4)];
               i.d = [];
               for(j=0;j<i.arrangement.length;j++){
-                if(i.arrangement[j]==1||i.isfoil==1){
+                if(i.arrangement[j]==1){
                   i.imgs[j] = regularImgShuffled[regIdx];
                   regIdx++
                 }else{
@@ -543,10 +553,12 @@
                   i.c[j] = colorversion;
                   i.a[j] = arrowversion;
                   i.imgs[j] = fractals[colorversion];
+                  var vals = values[valueversion];
                   if (arrowversion == 1){
-                    var vals = values[valueversion];
                     i.p[j] = vals.map(function(val,j){return vals[arrowswitch[j]]})
-                  };
+                  }else{
+                    i.p[j] = vals;
+                  }
                 };
                 var vals = i.p[j];
                 //for all conditions
@@ -555,8 +567,13 @@
                 }
                 i.d[j]=vals;
               };
+
               return i
             });
+
+            // items = items.filter(function(i){return(i.condition=='TT' && i.c[0]==0 && i.c[1]==1)})
+            // items = items.filter(function(i){return( i.condition=='T' && i.v[0]==6 )})
+            // Experiment.items = items
             return items;
           };
 
