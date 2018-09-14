@@ -22,7 +22,7 @@ def home():
 @app.route('/save',methods=['POST'])
 def save():
     timestr = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
-    unique_id = binascii.hexlify(os.urandom(16))
+    fileName = post.get('fileName')
     post = json.loads(request.get_data())
     jsonStrings = post.get('dataAsJSON')
     csvStrings = post.get('csvStrings')
@@ -31,10 +31,10 @@ def save():
         if not os.path.isdir(dir):
             os.makedirs(dir)
     for i,string in enumerate(jsonStrings):
-        with open(os.path.join('data','json',timestr+'_'+unique_id+'_'+str(i)+'.json'),'w') as f:
+        with open(os.path.join('data','json',timestr+'_'+fileName+'_'+str(i)+'.json'),'w') as f:
             f.write(string.encode('utf8'))
     for i,string in enumerate(csvStrings):
-        with open(os.path.join('data','csv',folder,timestr+'_'+unique_id+'_'+str(i)+'.csv'),'w') as f:
+        with open(os.path.join('data','csv',folder,timestr+'_'+fileName+'_'+str(i)+'.csv'),'w') as f:
             f.write(string.encode('utf8'))
     return json.dumps({'success':True})
 
