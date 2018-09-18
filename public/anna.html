@@ -21,7 +21,7 @@
     <script>
 
     var nTrialsPerSession = {
-        1 : 280, 2 : 280, 3 : 280, 4 : 603, 5 : 110
+        1 : 280, 2 : 280, 3 : 280, 4 : 603, 5 : 110, 6: 7
     };
 
     var getDevalImg = function(){
@@ -354,7 +354,8 @@
             this.fractals.paths(),
             this.fractals.paths(),
             this.regular.paths().concat(this.fractals.paths()),
-            this.fractals.paths().concat(this.deval.paths())
+            this.fractals.paths().concat(this.deval.paths()),
+            this.fractals.paths()
           ];
           var imgPaths = imgSelection[Experiment.session.sessionID-1];
 
@@ -634,7 +635,42 @@
 
           }
 
-          var itemFunctions = [getTrainingItems,getTrainingItems,getTrainingItems,getExpItems,getDevalItems];
+          var getMemoryItems = function(){
+            var fractals = jsPsych.randomization.shuffle(Experiment.img.fractals.items);
+            var items = [];
+
+            for(i=0;i<fractals.length;i++){
+              var valueversion = colorcode[i];
+              var arrowversion = arrowcode[i];
+              if (arrowversion == 0){
+                var vals = values[valueversion];
+              }else{
+                var vals = values[valueversion];
+                vals = vals.map(function(val,j){return vals[arrowswitch[j]]})
+              };
+              dispVals = mefirst == 1 ? vals : vals.map(function(val,j){return vals[mefirstswitch[j]]});
+
+              var n = {
+                c : [i],
+                v : [valueversion],
+                a : [arrowversion],
+                condition : 'M',
+                arrangement : [4],
+                combination : [-1],
+                imgs : [fractals[i]],
+                p : [vals],
+                d : [dispVals],
+                m : mefirst,
+                isfoil  : 0
+              }
+              items.push(n);
+            };
+
+            return items;
+
+          }
+
+          var itemFunctions = [getTrainingItems,getTrainingItems,getTrainingItems,getExpItems,getDevalItems,getMemoryItems];
           var items = itemFunctions[Experiment.session.sessionID-1].call();
           items = items.slice(0,Experiment.settings.nTrials)
 

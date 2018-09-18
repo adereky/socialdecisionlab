@@ -40,7 +40,11 @@ jsPsych.plugins["anna"] = (function() {
 				},
 				feedbackDiv : 'position:absolute;font-size:20px;font-weight:bold;top:'+(env.centY-90).toString()+'px;left:'+(env.centX-80).toString()+'px;',
 				noResponseDiv : 'position:absolute;font-size:20px;font-weight:bold;top:'+(env.centY-30).toString()+'px;left:'+(env.centX-110).toString()+'px;',
-				choosePar : 'position:absolute;text-align:center;width:150px;left:'+(env.centX-75).toString()+'px;top:'+(env.centY+230).toString()+'px;'
+				choosePar : 'position:absolute;text-align:center;width:150px;left:'+(env.centX-75).toString()+'px;top:'+(env.centY+230).toString()+'px;',
+				reminder : 'margin:0px;position:absolute;font-size:12px;color:#b70000;font-weight: 700;\
+				width:200px;left:'+(env.centX-145).toString()+'px;top:'+(env.centY+240).toString()+'px;',
+				continueButton : 'font-weight: 700;position:absolute;width:80px;height:45px;left:'+(env.centX+75).toString()+'px;top:'+(env.centY+230).toString()+'px;',
+				memoryInput : 'background: #2b2b2b;color: white;font-weight: 800;border: none;margin: 0px 5px;'
 			};
 
 			timeOutHandlers = []
@@ -73,8 +77,10 @@ jsPsych.plugins["anna"] = (function() {
 
 			// function to end trial when it is time
 			var end_trial = function(response) {
-				for(t=0;t<timeOutHandlers.length;t++){ clearTimeout(timeOutHandlers[t])};
-				jsPsych.pluginAPI.cancelKeyboardResponse(keyboardListener);
+				if(trial.condition!='M'){
+					for(t=0;t<timeOutHandlers.length;t++){ clearTimeout(timeOutHandlers[t])};
+					jsPsych.pluginAPI.cancelKeyboardResponse(keyboardListener);
+				}
 
 				// gather the data to store for the trial
 				if(typeof response == 'undefined'){
@@ -106,6 +112,17 @@ jsPsych.plugins["anna"] = (function() {
 				for (var key in flatItem){
 					trial_data[key] = flatItem[key];
 				};
+
+				if(trial.condition=='M'){
+					var memoryInputs = $('input').map(function(idx,i){return(parseInt(i.value))})
+					for(i=0;i<4;i++){
+						trial_data['memoryInput_'+(i+1).toString()] = memoryInputs[i]
+						trial_data['memoryCorrect_'+(i+1).toString()] = trial.d[0][i]==memoryInputs[i] ? 1 : 0;
+					}
+					display_element.html('');
+					moveOn(trial_data);
+					return
+				}
 
 
 				if(typeof response == 'undefined'){
@@ -192,6 +209,13 @@ jsPsych.plugins["anna"] = (function() {
 								"<div id='singleVal' style="+valStyle2+"background-color:"+
 								trial.imgs[i].bgColor+";>\
 								<p style='margin:auto;color:"+trial.imgs[i].textColor+";'>"+s2+"</p></div>";
+						}else if(trial.arrangement[i]=='4'){
+							imgDivs[i].innerHTML = "<div id='singleVal' style="+valStyle1+"background-color:black;color:white;>"+
+								"<input id='input1' placeholder='??' style='"+styles.memoryInput+"' type='text' size='2' />/"+
+								"<input id='input2' placeholder='??' style='"+styles.memoryInput+"' type='text' size='2'/></div>"+
+								"<div id='singleVal' placeholder='??' style='"+valStyle2+"background-color:black;black;color:white;'>"+
+								"<input id='input3' placeholder='??' style='"+styles.memoryInput+"' type='text' size='2' />/"+
+								"<input id='input4' placeholder='??' style='"+styles.memoryInput+"' type='text' size='2'/></div>";
 						}else{
 							imgDivs[i].innerHTML = "<div id='singleVal' style="+valStyle1+"background-color:black;>\
 								<p style='margin:auto;color:white;'>##/##</p></div>"+
@@ -201,8 +225,15 @@ jsPsych.plugins["anna"] = (function() {
 					}
 				},
 				choose : function(){
-					var choosePar = "<p class='choose' style="+styles.choosePar+">Choose \< OR \></p>";
-					display_element.append(choosePar);
+					if(trial.condition!='M'){
+						var choosePar = "<p class='choose' style="+styles.choosePar+">Choose \< OR \></p>";
+						display_element.append(choosePar);
+					}else{
+						var continueButton = "<button id='memoryTrialContinueButton' style='"+styles.continueButton+"'>Continue</button>";
+						var reminder = "<p id='memoryTrialReminder' style='"+styles.reminder+"'></p>";
+						display_element.append(continueButton);
+						display_element.append(reminder);
+					}
 				},
 				init : function(){
 					this.imgContainers();
@@ -212,6 +243,20 @@ jsPsych.plugins["anna"] = (function() {
 				}
 			};
 
+			confimMemoryInput = function(){
+				var memoryInputs = []
+				$('input').map(function(idx,i){return(memoryInputs.push(i.value))})
+				if(!memoryInputs.every(function(i){return(i!='')})){
+					$('#memoryTrialReminder').html('All input fields must be filled.')
+					return false
+				}
+				if(!memoryInputs.every(function(i){return( !isNaN(parseInt(i)) )}) ){
+					$('#memoryTrialReminder').html('All input values must be numeric.')
+					return false
+				}
+				return true
+			}
+
 			displayStimuli.init();
 
 			if(trial.sessionNr == 4){
@@ -219,13 +264,22 @@ jsPsych.plugins["anna"] = (function() {
 			};
 
 			// start the response listener
-			var keyboardListener = jsPsych.pluginAPI.getKeyboardResponse({
-				callback_function: keyboardCallback,
-				valid_responses: [37,39],
-				rt_method: 'date',
-				persist: true,
-				allow_held_key: false
-			});
+			if(trial.condition!='M'){
+				var keyboardListener = jsPsych.pluginAPI.getKeyboardResponse({
+					callback_function: keyboardCallback,
+					valid_responses: [37,39],
+					rt_method: 'date',
+					persist: true,
+					allow_held_key: false
+				});
+			}else{
+				$('#memoryTrialContinueButton').on('click',function(){
+					if(confimMemoryInput()){
+						end_trial()
+					}
+				})
+			}
+
 		};
 
 		return plugin;
