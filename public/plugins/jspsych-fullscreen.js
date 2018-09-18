@@ -199,7 +199,7 @@ jsPsych.plugins['fullscreen'] = (function(){
                 type: 'post',
                 url: './save',
                 data: JSON.stringify({
-                  subjectID: [Experiment.session.UID,Experiment.session.sessionID,Experiment.session.sessionCode].join('-'),
+                  fileName: [Experiment.session.UID,Experiment.session.sessionID,Experiment.session.sessionCode].join('_'),
                   folder: jsPsych.data.getURLVariable('f'),
                   csvStrings: Experiment.utils.getExperimentCSVData(),
                   dataAsJSON: [jsPsych.data.dataAsJSON(),JSON.stringify(Experiment.session)]
