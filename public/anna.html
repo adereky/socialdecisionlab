@@ -156,7 +156,37 @@
         },
         getExperimentCSVData:function(){
           Experiment.session.sessionEnd = new Date().toString().replace(',','');
-          function getUserDataAsCSV(){
+
+          function getSessionDataAsCSV(){
+            if(Experiment.session.sessionID==5){
+              Experiment.session.randPayoffS_CHF = 5
+              Experiment.session.randPayoffC_CHF = 5
+            }else{
+              var trials = jsPsych.data.getData().filter(function(i){return(i.trial_type=='anna')})
+              if(Experiment.session.sessionID==1){
+                if(trials.length>80){
+                  var rand1 = Math.floor(Math.random()*(trials.length-70))+70
+                  var rand2 = Math.floor(Math.random()*(trials.length-70))+70
+                }else{
+                  var rand1 = NaN
+                  var rand2 = NaN
+                }
+              }else{
+                var rand1 = Math.floor(Math.random()*trials.length)
+                var rand2 = Math.floor(Math.random()*trials.length)
+              }
+              var randTrial1 = trials[rand1]
+              var randTrial2 = trials[rand2]
+              if(typeof randTrial1 != 'undefined'){
+                Experiment.session.randPayoffS_CHF = ((randTrial1.payoffS+randTrial2.payoffS)/2.0)/5.0
+                Experiment.session.randPayoffC_CHF = ((randTrial1.payoffC+randTrial2.payoffC)/2.0)/5.0
+              }else{
+                Experiment.session.randPayoffS_CHF = NaN
+                Experiment.session.randPayoffC_CHF = NaN
+              }
+
+            }
+
             var keys = Object.keys(Experiment.session);
             var header = '';
             var dataStr = '';
@@ -170,7 +200,8 @@
             dataStr = header+'\n'+dataStr+'\n';
             return dataStr
           };
-          var csvStrings = [jsPsych.data.dataOfTypeAsCSV('anna'),getUserDataAsCSV()];
+
+          var csvStrings = [jsPsych.data.dataOfTypeAsCSV('anna'),getSessionDataAsCSV()];
           return csvStrings;
         },
         saveZip:function(){

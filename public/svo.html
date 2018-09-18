@@ -120,7 +120,14 @@
         },
         getExperimentCSVData:function(){
           Experiment.session.sessionEnd = new Date().toString().replace(',','');
-          function getUserDataAsCSV(){
+          
+          var trials = jsPsych.data.getData().filter(function(i){return(i.trial_type=='svo')})
+          var rand1 = Math.floor(Math.random()*trials.length)
+          var randTrial1 = trials[rand1]
+          Experiment.session.randPayoffS_CHF = randTrial1.payoffS/5.0
+          Experiment.session.randPayoffC_CHF = randTrial1.payoffC/5.0
+
+          function getSessionAsCSV(){
             var keys = Object.keys(Experiment.session);
             var header = '';
             var dataStr = '';
@@ -134,7 +141,8 @@
             dataStr = header+'\n'+dataStr+'\n';
             return dataStr
           };
-          var csvStrings = [jsPsych.data.dataOfTypeAsCSV('svo'),getUserDataAsCSV()];
+
+          var csvStrings = [jsPsych.data.dataOfTypeAsCSV('svo'),getSessionAsCSV()];
           return csvStrings;
         },
         saveZip:function(){
