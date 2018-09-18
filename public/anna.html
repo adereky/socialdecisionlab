@@ -180,7 +180,7 @@
           root.file("ReadMe.txt", "Please send this folder to adereky@ethz.ch\n");
           var folder = jsPsych.data.getURLVariable('f')
           var exp_folder = root.folder(folder);
-          var fileName = [Experiment.session.UID,Experiment.session.sessionID,Experiment.session.sessionCode].join('-')
+          var fileName = [Experiment.session.UID,'anna-'+Experiment.session.sessionID].join('_')
           exp_folder.file(fileName+"_0.csv", csvStrings[0]);
           exp_folder.file(fileName+"_1.csv",  csvStrings[1]);
           zip.generateAsync({type:"base64"}).then(function (base64) {
