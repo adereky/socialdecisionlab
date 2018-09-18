@@ -1,6 +1,6 @@
 /**
  * Adrian Oesch
- * January 2016
+ * Sept 2018
  *
  * adapted from https://groups.google.com/forum/#!topic/jspsych/qP1qV82msm0
  */

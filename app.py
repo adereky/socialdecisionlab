@@ -22,8 +22,8 @@ def home():
 @app.route('/save',methods=['POST'])
 def save():
     timestr = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
-    fileName = post.get('fileName')
     post = json.loads(request.get_data())
+    fileName = post.get('fileName')
     jsonStrings = post.get('dataAsJSON')
     csvStrings = post.get('csvStrings')
     folder = post.get('folder','')
