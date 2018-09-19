@@ -82,6 +82,8 @@ def send_payout():
     uid = request.args.get('i')
     if not folder or not uid:
         return render_template('payout.html',state='invalid')
+    if not os.path.exists(os.path.join('data','csv',folder)):
+        return render_template('payout.html',state='nofolder')
     sessionFiles = [os.path.join('data','csv',folder,i) for i in os.listdir(os.path.join('data','csv',folder)) if uid in i and i[-6:]=='_1.csv']
     if len(sessionFiles)<7:
         return render_template('payout.html',state='incomplete')

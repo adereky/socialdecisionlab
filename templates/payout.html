@@ -18,6 +18,8 @@
   <p>URL parameters invalid</p>
 {% elif state=='incomplete' %}
   <p>User data not complete.</p>
+  {% elif state=='nofolder' %}
+    <p>Folder does not exist.</p>
 {% else %}
   <p>Your payment from part 1 was: </p>
   <p>CHF {{ part1Self }} for Business<br/>
