@@ -58,13 +58,9 @@ def send_single_file(path):
     return send_file(os.path.join('data','csv',path),as_attachment=True)
 
 @app.route('/zipped/',methods=['GET'])
-@basic_auth.required
-def send_zipped_home():
-    return send_zipped_dir('')
-
 @app.route('/zipped/<path:path>',methods=['GET'])
 @basic_auth.required
-def send_zipped_dir(path):
+def send_zipped_dir(path=''):
     dir = os.path.join('data','csv',path)
     zipf = BytesIO()
     zipo = zipfile.ZipFile(zipf,'w', zipfile.ZIP_DEFLATED)
@@ -79,12 +75,30 @@ def send_zipped_dir(path):
 def get_ip():
     return request.remote_addr
 
-@app.route('/appendNotfiJob',methods=['POST'])
-def append_notif():
-    post = json.loads(request.data)
-    with open('notifications.txt','a') as f:
-        f.write(post['notifJob'])
-    return json.dumps({'success':True})
+@app.route('/payout',methods=['GET'])
+def send_payout():
+    folder = request.args.get('f')
+    uid = request.args.get('i')
+    if not folder or not uid:
+        return render_template('payout.html',state='invalid')
+    sessionFiles = [os.path.join('data','csv',folder,i) for i in os.listdir(os.path.join('data','csv',folder)) if uid in i and i[-6]=='_1.csv']
+    if len(sessionFiles)<7:
+        return render_template('payout.html',state='incomplete')
+    sessionData = pd.concat([pd.read(i) for i in sessionFiles])
+    part1rowSel = (sessionData.sessionID <= 3) | (sessionData.sessionID==7)
+    part2rowSel = (sessionData.sessionID > 3) & (sessionData.sessionID < 6)
+    args = {
+        'complete':True,
+        'part1Self': sessionData.loc[part1rowSel,'randPayoffS_CHF'].sum().round().values[0],
+        'part1Charity': sessionData.loc[part1rowSel,'randPayoffC_CHF'].sum().round().values[0],
+        'part2Self': sessionData.loc[part2rowSel,'randPayoffS_CHF'].sum().round().values[0],
+        'part2Charity': sessionData.loc[part2rowSel,'randPayoffC_CHF'].sum().round().values[0],
+        'selectedCharity':sessionData.loc[sessionData.sessionID==1,'charity'].values[0]
+    }
+    kwargs['finalSelf'] = args['part1Self']+args['part2Self']
+    kwargs['finalCharity'] = args['part1Charity']+args['part2Charity']
+    return render_template('payout.html',**kwargs)
+
 
 @app.route('/<path:path>',methods=['GET'])
 def send_public(path):

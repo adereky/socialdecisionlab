@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Social Decision Lab</title>
+</head>
+<style>
+.centered{
+  font-family: helvetica;
+  width:600px;
+  margin: 100px auto ;
+}
+</style>
+<body>
+<div class="centered">
+  <p><i>Social Decision Lab</i></p>
+<h2>Participant's Payout:</h2>
+{% if state=='invalid' %}
+  <p>URL parameters invalid</p>
+{% elif state=='incomplete' %}
+  <p>User data not complete.</p>
+{% else %}
+  <p>Your payment from part 1 was: </p>
+  <p>CHF {{ part1Self }} for Business<br/>
+    CHF {{ part1Charity }} for Society</p>
+  <p>Your payment from part 2 was: </p>
+  <p>CHF {{ part2Self }} for Business<br/>
+    CHF {{ part2Charity }} for Society</p>
+  <p>This makes a total amount of: </p>
+  <p>CHF {{ finalSelf }} for Business<br/>
+    CHF {{ finalCharity }} for Society.</p>
+    <p>You receive CHF {{ finalSelf }} and CHF {{ finalCharity }} will be donated to following charity: {{ selectedCharity }}.</p>
+{% endif %}
+</div>
+</body>
+</html>
