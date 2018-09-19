@@ -120,7 +120,7 @@
         },
         getExperimentCSVData:function(){
           Experiment.session.sessionEnd = new Date().toString().replace(',','');
-          
+
           var trials = jsPsych.data.getData().filter(function(i){return(i.trial_type=='svo')})
           var rand1 = Math.floor(Math.random()*trials.length)
           var randTrial1 = trials[rand1]
@@ -229,6 +229,7 @@
             UID : urlData.i,
             sessionCode : jsPsych.randomization.randomID(12),
             sessionStart : new Date().toString().replace(',',''),
+            mefirst: parseInt(urlData['m']),
             browserName : browser.name,
             browserVersion : browser.version
           };
@@ -242,6 +243,7 @@
           var block = {
             type: 'svo',
             timeline : items,
+            mefirst:Experiment.session.mefirst,
             timing_post_trial: 200
           };
 

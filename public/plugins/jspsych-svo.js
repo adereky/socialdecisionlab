@@ -10,6 +10,7 @@ jsPsych.plugins['svo'] = (function(){
     var plugin = {};
 
     plugin.trial = function(display_element, trial){
+
       var trial_data = {}
       trial_data.nClicks = 0
       trial_data.name = trial.name
@@ -19,18 +20,20 @@ jsPsych.plugins['svo'] = (function(){
         trial_data[key] = flatOptions[key];
       };
 
+      var mefirst = trial.mefirst;
+
       var hoverOptions = trial.options.map(function(i){
         var html = '<div class="svoItem">'+
-        '<span class="svoChildItem">'+i[0]+'</span><br/>'+
+        '<span class="svoChildItem">'+(mefirst==1? i[0] : i[1])+'</span><br/>'+
         '<span class="svoChildItem">|</span><br/>'+
-        '<span class="svoChildItem">'+i[1]+'</span><br/>'+
+        '<span class="svoChildItem">'+(mefirst==1? i[1] : i[0])+'</span><br/>'+
         '</div>'
         return(html)
       })
       var rowHead = '<div style="margin:7px 0px;width:80px;float:left;text-align:left;">'+
-      '<span>Business:</span><br/>'+
+      '<span>'+(mefirst==1?'Business':'Society')+':</span><br/>'+
       '<span></span><br/>'+
-      '<span>Society:</span><br/>'+
+      '<span>'+(mefirst==1?'Society':'Business')+':</span><br/>'+
       '</div>'
 
       var html = '<div style="width:450px;height:300px;margin:auto;">'+
@@ -55,10 +58,16 @@ jsPsych.plugins['svo'] = (function(){
       $('#jspsych-button').on('click',function(){
         if($('.svoItem.selected').length==1){
           var response = $('.svoItem.selected').text().split('|').map(function(i){return(parseInt(i))})
-          trial_data.payoffS = response[0]
-          trial_data.payoffC = response[1]
+          if(mefirst==1){
+            trial_data.payoffS = response[0]
+            trial_data.payoffC = response[1]
+          }else{
+            trial_data.payoffS = response[1]
+            trial_data.payoffC = response[0]
+          }
           trial_data.time = (Date.now()-t0)/1000.0
           display_element.html('')
+          console.log(trial_data)
           jsPsych.finishTrial(trial_data)
         }else{
           alert('No response selected')
