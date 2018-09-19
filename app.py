@@ -81,18 +81,17 @@ def send_payout():
     uid = request.args.get('i')
     if not folder or not uid:
         return render_template('payout.html',state='invalid')
-    sessionFiles = [os.path.join('data','csv',folder,i) for i in os.listdir(os.path.join('data','csv',folder)) if uid in i and i[-6]=='_1.csv']
+    sessionFiles = [os.path.join('data','csv',folder,i) for i in os.listdir(os.path.join('data','csv',folder)) if uid in i and i[-6:]=='_1.csv']
     if len(sessionFiles)<7:
         return render_template('payout.html',state='incomplete')
-    sessionData = pd.concat([pd.read(i) for i in sessionFiles])
+    sessionData = pd.concat([pd.read_csv(i) for i in sessionFiles])
     part1rowSel = (sessionData.sessionID <= 3) | (sessionData.sessionID==7)
     part2rowSel = (sessionData.sessionID > 3) & (sessionData.sessionID < 6)
-    args = {
-        'complete':True,
-        'part1Self': sessionData.loc[part1rowSel,'randPayoffS_CHF'].sum().round().values[0],
-        'part1Charity': sessionData.loc[part1rowSel,'randPayoffC_CHF'].sum().round().values[0],
-        'part2Self': sessionData.loc[part2rowSel,'randPayoffS_CHF'].sum().round().values[0],
-        'part2Charity': sessionData.loc[part2rowSel,'randPayoffC_CHF'].sum().round().values[0],
+    kwargs = {
+        'part1Self': int(sessionData.loc[part1rowSel,'randPayoffS_CHF'].sum().round()),
+        'part1Charity': int(sessionData.loc[part1rowSel,'randPayoffC_CHF'].sum().round()),
+        'part2Self': int(sessionData.loc[part2rowSel,'randPayoffS_CHF'].sum().round()),
+        'part2Charity': int(sessionData.loc[part2rowSel,'randPayoffC_CHF'].sum().round()),
         'selectedCharity':sessionData.loc[sessionData.sessionID==1,'charity'].values[0]
     }
     kwargs['finalSelf'] = args['part1Self']+args['part2Self']
