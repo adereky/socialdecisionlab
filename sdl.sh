@@ -5,7 +5,7 @@ case "$1" in
     echo -n "Starting SDL: "
     cd /home/oescha/socialdecisionlab/
     source ./env.txt
-    sdl/bin/gunicorn --workers 4 --bind localhost:5000 --daemon --log-file gunicorn.log wsgi:app
+    gunicorn --workers 4 --bind localhost:5000 --daemon --log-file gunicorn.log wsgi:app
     echo "Success"
     ;;
   stop)
