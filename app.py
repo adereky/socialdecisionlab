@@ -95,8 +95,8 @@ def send_payout():
         'part2Charity': int(sessionData.loc[part2rowSel,'randPayoffC_CHF'].sum().round()),
         'selectedCharity':sessionData.loc[sessionData.sessionID==1,'charity'].values[0]
     }
-    kwargs['finalSelf'] = args['part1Self']+args['part2Self']
-    kwargs['finalCharity'] = args['part1Charity']+args['part2Charity']
+    kwargs['finalSelf'] = kwargs['part1Self']+kwargs['part2Self']
+    kwargs['finalCharity'] = kwargs['part1Charity']+kwargs['part2Charity']
     return render_template('payout.html',**kwargs)
 
 
