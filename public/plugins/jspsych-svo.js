@@ -15,9 +15,9 @@ jsPsych.plugins['svo'] = (function(){
       trial_data.nClicks = 0
       trial_data.name = trial.name
       var t0 = Date.now()
-      flatOptions = Experiment.utils.flattenJSON(trial.options)
-      for (var key in flatOptions){
-        trial_data[key] = flatOptions[key];
+      flatTrial = Experiment.utils.flattenJSON(trial)
+      for (var key in flatTrial){
+        trial_data[key] = flatTrial[key];
       };
 
       var mefirst = trial.mefirst;
