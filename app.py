@@ -91,6 +91,7 @@ def send_payout():
     part1rowSel = (sessionData.sessionID <= 3) | (sessionData.sessionID==7)
     part2rowSel = (sessionData.sessionID > 3) & (sessionData.sessionID < 6)
     kwargs = {
+        'uid': uid,
         'part1Self': int(sessionData.loc[part1rowSel,'randPayoffS_CHF'].sum().round()),
         'part1Charity': int(sessionData.loc[part1rowSel,'randPayoffC_CHF'].sum().round()),
         'part2Self': int(sessionData.loc[part2rowSel,'randPayoffS_CHF'].sum().round()),
