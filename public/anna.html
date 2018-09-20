@@ -158,10 +158,7 @@
           Experiment.session.sessionEnd = new Date().toString().replace(',','');
 
           function getSessionDataAsCSV(){
-            if(Experiment.session.sessionID==5){
-              Experiment.session.randPayoffS_CHF = 5
-              Experiment.session.randPayoffC_CHF = 5
-            }else{
+            if(Experiment.session.sessionID<5){
               var trials = jsPsych.data.getData().filter(function(i){return(i.trial_type=='anna')})
               if(Experiment.session.sessionID==1){
                 if(trials.length>80){
@@ -184,8 +181,13 @@
                 Experiment.session.randPayoffS_CHF = NaN
                 Experiment.session.randPayoffC_CHF = NaN
               }
-
-            }
+            }else if(Experiment.session.sessionID==5){
+              Experiment.session.randPayoffS_CHF = 5
+              Experiment.session.randPayoffC_CHF = 5
+            }else{
+              Experiment.session.randPayoffS_CHF = NaN
+              Experiment.session.randPayoffC_CHF = NaN
+            };
 
             var keys = Object.keys(Experiment.session);
             var header = '';
