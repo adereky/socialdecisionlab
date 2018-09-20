@@ -13,27 +13,27 @@
 <body>
 <div class="centered">
   <p><i>Social Decision Lab</i></p>
-<h2>Participant's Payout:</h2>
-{% if state=='invalid' %}
-  <p>URL parameters invalid</p>
-{% elif state=='incomplete' %}
-  <p>User data not complete.</p>
+  {% if state=='invalid' %}
+    <p>URL parameters invalid</p>
+  {% elif state=='incomplete' %}
+    <p>User data not complete.</p>
   {% elif state=='nofolder' %}
     <p>Folder does not exist.</p>
-{% else %}
-  <p>Your payment from part 1 was: </p>
-  <p>CHF {{ part1Self }} for Business<br/>
-    CHF {{ part1Charity }} for Society</p>
-  <p>Your payment from part 2 was: </p>
-  <p>CHF {{ part2Self }} for Business<br/>
-    CHF {{ part2Charity }} for Society</p>
-  <p>This makes a total amount of: </p>
-  <p>CHF {{ finalSelf }} for Business<br/>
-    CHF {{ finalCharity }} for Society.</p>
-  <p>You receive CHF {{ finalSelf }} and CHF {{ finalCharity }} will be donated to following charity:<br/>
-    {{ selectedCharity }}</p>
-  <p><b>Thanks for your particpation.</b></p>
-{% endif %}
+  {% else %}
+    <h2>Your Final Payment (Partcipant Code {{ uid }}):</h2>
+    <p>Your payment from part 1 is: </p>
+    <p>CHF {{ part1Self }} for Business<br/>
+      CHF {{ part1Charity }} for Society</p>
+    <p>Your payment from part 2 is: </p>
+    <p>CHF {{ part2Self }} for Business<br/>
+      CHF {{ part2Charity }} for Society</p>
+    <p>You have earned a total amount of: </p>
+    <p>CHF {{ finalSelf }} for Business<br/>
+      CHF {{ finalCharity }} for Society.</p>
+    <p>You receive CHF {{ finalSelf }} and CHF {{ finalCharity }} will be donated by bank to following charity:<br/>
+      {{ selectedCharity }}</p>
+    <p><b>Thank you for your particpation.</b></p>
+  {% endif %}
 </div>
 </body>
 </html>
