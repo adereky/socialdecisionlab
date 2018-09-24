@@ -175,8 +175,9 @@
               var randTrial1 = trials[rand1]
               var randTrial2 = trials[rand2]
               if(typeof randTrial1 != 'undefined'){
-                Experiment.session.randPayoffS_CHF = ((randTrial1.payoffS+randTrial2.payoffS)/2.0)/5.0
-                Experiment.session.randPayoffC_CHF = ((randTrial1.payoffC+randTrial2.payoffC)/2.0)/5.0
+                var conversionRate = 5.0
+                Experiment.session.randPayoffS_CHF = ((randTrial1.payoffS+randTrial2.payoffS)/2.0)/ conversionRate
+                Experiment.session.randPayoffC_CHF = ((randTrial1.payoffC+randTrial2.payoffC)/2.0)/ conversionRate
               }else{
                 Experiment.session.randPayoffS_CHF = NaN
                 Experiment.session.randPayoffC_CHF = NaN
