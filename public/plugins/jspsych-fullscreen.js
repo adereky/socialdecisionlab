@@ -71,25 +71,25 @@ jsPsych.plugins['fullscreen'] = (function(){
         getFullScreenAbort : function (callObj){
           var fullScreenAbort = function(){
             if (!document.webkitIsFullScreen && typeof document.webkitIsFullScreen != 'undefined'){
-              console.log('web abort')
+              console.log('fs abort web')
               callObj();
               callObj();
               vs.removeListener();
               fs.removeListener();
             }else if (!document.mozFullScreen && typeof document.mozFullScreen != 'undefined'){
-              console.log('moz abort')
+              console.log('fs abort moz')
               callObj();
               callObj();
               vs.removeListener();
               fs.removeListener();
             }else if (!document.msFullscreenElement && typeof document.msFullscreenElement != 'undefined'){
-              console.log('ms abort')
+              console.log('fs abort ms')
               callObj();
               callObj();
               vs.removeListener();
               fs.removeListener();
             }else if (!document.fullscreenchange && typeof document.fullscreenchange != 'undefined'){
-              console.log('abort')
+              console.log('fs abort w3')
               callObj();
               callObj();
               vs.removeListener();
@@ -101,6 +101,7 @@ jsPsych.plugins['fullscreen'] = (function(){
         addListener : function(){
           if (!document.webkitIsFullScreen && typeof document.webkitIsFullScreen != 'undefined'){
             document.addEventListener('webkitfullscreenchange',fs_plugin_glob.fs_abort,false);
+            document.addEventListener('fullscreenchange',fs_plugin_glob.fs_abort,false);
           }else if (!document.mozFullScreen && typeof document.mozFullScreen != 'undefined'){
             document.addEventListener('mozfullscreenchange',fs_plugin_glob.fs_abort,false);
           }else if (!document.msFullscreenElement && typeof document.msFullscreenElement != 'undefined'){
