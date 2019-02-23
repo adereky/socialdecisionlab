@@ -169,7 +169,8 @@
               url: './save',
               data: JSON.stringify({
                 subjectID: [Experiment.session.UID,Experiment.session.sessionID,Experiment.session.sessionCode].join('-'),
-                folder: jsPsych.data.getURLVariable('f'),
+                // folder: jsPsych.data.getURLVariable('f'),
+                folder: 'BLU_Test180919',
                 csvStrings: Experiment.utils.getExperimentCSVData(),
                 dataAsJSON: [jsPsych.data.dataAsJSON(),JSON.stringify(Experiment.session)]
               }),
