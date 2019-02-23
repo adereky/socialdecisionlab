@@ -211,11 +211,11 @@ jsPsych.plugins["anna"] = (function() {
 								<p style='margin:auto;color:"+trial.imgs[i].textColor+";'>"+s2+"</p></div>";
 						}else if(trial.arrangement[i]=='4'){
 							imgDivs[i].innerHTML = "<div id='singleVal' style="+valStyle1+"background-color:black;color:white;>"+
-								"<input id='input1' placeholder='??' style='"+styles.memoryInput+"' type='text' size='2' />/"+
-								"<input id='input2' placeholder='??' style='"+styles.memoryInput+"' type='text' size='2'/></div>"+
+								"<input id='input1' placeholder='??' style='"+styles.memoryInput+"' type='text' size='1' />/"+
+								"<input id='input2' placeholder='??' style='"+styles.memoryInput+"' type='text' size='1'/></div>"+
 								"<div id='singleVal' placeholder='??' style='"+valStyle2+"background-color:black;black;color:white;'>"+
-								"<input id='input3' placeholder='??' style='"+styles.memoryInput+"' type='text' size='2' />/"+
-								"<input id='input4' placeholder='??' style='"+styles.memoryInput+"' type='text' size='2'/></div>";
+								"<input id='input3' placeholder='??' style='"+styles.memoryInput+"' type='text' size='1' />/"+
+								"<input id='input4' placeholder='??' style='"+styles.memoryInput+"' type='text' size='1'/></div>";
 						}else{
 							imgDivs[i].innerHTML = "<div id='singleVal' style="+valStyle1+"background-color:black;>\
 								<p style='margin:auto;color:white;'>##/##</p></div>"+

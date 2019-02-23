@@ -192,9 +192,11 @@ jsPsych.plugins['fullscreen'] = (function(){
 
       $('#jspsych-fullscreen-button').on('click',function(){
           if (trial.exit) {
-            fs.removeListener();
-            vs.removeListener();
-            fs.exit();
+            if(Experiment.session.sessionID!=6){
+              fs.removeListener();
+              vs.removeListener();
+              fs.exit();
+            }
             display_element.html('');
             $.ajax({
                 type: 'post',
@@ -216,12 +218,14 @@ jsPsych.plugins['fullscreen'] = (function(){
                 }
               });
           }else{
-            fs.launch(document.documentElement);
-            fs_plugin_glob.fs_abort = fs.getFullScreenAbort(trial.on_fullscreen_abort)
-            fs.addListener();
-            if (trial.visibility){
-                fs_plugin_glob.vs_abort = vs.getVisibilityAbort(trial.on_visibility_abort);
-                setTimeout(vs.addListener,800);
+            if(Experiment.session.sessionID!=6){
+              fs.launch(document.documentElement);
+              fs_plugin_glob.fs_abort = fs.getFullScreenAbort(trial.on_fullscreen_abort)
+              fs.addListener();
+              if (trial.visibility){
+                  fs_plugin_glob.vs_abort = vs.getVisibilityAbort(trial.on_visibility_abort);
+                  setTimeout(vs.addListener,800);
+              }
             }
             display_element.html('');
             jsPsych.finishTrial();
