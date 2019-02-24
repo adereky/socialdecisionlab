@@ -79,7 +79,11 @@ def get_ip():
 @app.route('/payout',methods=['GET'])
 def send_payout():
     if not request.args.get('dev'):
+<<<<<<< HEAD
         return render_template('payout.html',state='not calculated')
+=======
+        return render_template('payout.html',state='not caculated')
+>>>>>>> 7071c870ef24d72df89c6b5fe248cc7748b85060
     folder = request.args.get('f')
     uid = request.args.get('i')
     if not folder or not uid:
