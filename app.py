@@ -79,11 +79,7 @@ def get_ip():
 @app.route('/payout',methods=['GET'])
 def send_payout():
     if not request.args.get('dev'):
-<<<<<<< HEAD
         return render_template('payout.html',state='not calculated')
-=======
-        return render_template('payout.html',state='not caculated')
->>>>>>> 7071c870ef24d72df89c6b5fe248cc7748b85060
     folder = request.args.get('f')
     uid = request.args.get('i')
     if not folder or not uid:
@@ -98,8 +94,8 @@ def send_payout():
     part2rowSel = (sessionData.sessionID > 3) & (sessionData.sessionID < 6)
     kwargs = {
         'uid': uid,
-        'part1Self': int(sessionData.loc[part1rowSel,'randPayoffS_CHF'].sum().round()),
-        'part1Charity': int(sessionData.loc[part1rowSel,'randPayoffC_CHF'].sum().round()),
+        'part1Self': int(sessionData.loc[part1rowSel,'randPayoffS_CHF'].mean().round()),
+        'part1Charity': int(sessionData.loc[part1rowSel,'randPayoffC_CHF'].mean().round()),
         'part2Self': int(sessionData.loc[part2rowSel,'randPayoffS_CHF'].sum().round()),
         'part2Charity': int(sessionData.loc[part2rowSel,'randPayoffC_CHF'].sum().round()),
         'selectedCharity':sessionData.loc[sessionData.sessionID==1,'charity'].values[0]
