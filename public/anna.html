@@ -25,7 +25,7 @@
     };
 
     var getDevalImg = function(){
-      var devals = jsPsych.randomization.sample(imgData.regular,4)
+      var devals = jsPsych.randomization.shuffle(imgData.devals)
       var positions = jsPsych.randomization.shuffle(['h','h','v','v'])
       devals.map(function(i,val){
         val.position = positions[i];
