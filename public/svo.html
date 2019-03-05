@@ -121,11 +121,19 @@
         getExperimentCSVData:function(){
           Experiment.session.sessionEnd = new Date().toString().replace(',','');
 
-          var trials = jsPsych.data.getData().filter(function(i){return(i.trial_type=='svo')})
+          var trials = jsPsych.data.getData().filter(function(i){return(i.trial_type=='svo' & 'payoffS' in i)})
           var rand1 = Math.floor(Math.random()*trials.length)
+          var rand2 = Math.floor(Math.random()*trials.length)
           var randTrial1 = trials[rand1]
-          Experiment.session.randPayoffS_CHF = randTrial1.payoffS/5.0
-          Experiment.session.randPayoffC_CHF = randTrial1.payoffC/5.0
+          var randTrial2 = trials[rand2]
+          var conversionRate = parseFloat(jsPsych.data.getURLVariable('cr')) || 5.0;
+          Experiment.session.randPayoff1_IDX = randTrial1.trial_index;
+          Experiment.session.randPayoff2_IDX = randTrial2.trial_index;
+          Experiment.session.randPayoffS1_CHF = randTrial1.payoffS/conversionRate;
+          Experiment.session.randPayoffC1_CHF = randTrial1.payoffC/conversionRate;
+          Experiment.session.randPayoffS2_CHF = randTrial2.payoffS/conversionRate;
+          Experiment.session.randPayoffC2_CHF = randTrial2.payoffC/conversionRate;
+
 
           function getSessionAsCSV(){
             var keys = Object.keys(Experiment.session);
