@@ -108,7 +108,7 @@ def send_payout():
     kwargsDF = pd.DataFrame(kwargs,index=[0])
     payoutTable = os.path.join('data','csv',folder,'payoutDisplay.csv')
     if os.path.isfile(payoutTable):
-        kwargsDF.to_csv(payoutTable,append=True,index=False)
+        kwargsDF.to_csv(payoutTable,mode='a',header=False,index=False)
     else:
         kwargsDF.to_csv(payoutTable,index=False)
     return render_template('payout.html',**kwargs)
