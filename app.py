@@ -92,20 +92,21 @@ def send_payout():
     sessionData = pd.concat([pd.read_csv(i) for i in sessionFiles])
     sessionData['randPayoffS'] = sessionData.randPayoffS1_CHF+sessionData.randPayoffS2_CHF
     sessionData['randPayoffC'] = sessionData.randPayoffC1_CHF+sessionData.randPayoffC2_CHF
-    sessionData['randPayoffN'] = 2 - sessionData[['randPayoff1_IDX','randPayoff2_IDX']].isnull().sum(axis=0)
+    sessionData['randPayoffN'] = 2 - sessionData[['randPayoff1_IDX','randPayoff2_IDX']].isnull().sum(axis=1)
     part1rowSel = (sessionData.sessionID <= 3) | (sessionData.sessionID==7)
     part2rowSel = (sessionData.sessionID == 4) | (sessionData.sessionID == 5)
     kwargs = {
         'uid': uid,
-        'part1Self': ( sessionData.loc[part1rowSel,'randPayoffS'].sum() / sessionData.loc[part1rowSel,'randPayoffN'].sum() ).round(),
-        'part1Charity': ( sessionData.loc[part1rowSel,'randPayoffC'].sum() / sessionData.loc[part1rowSel,'randPayoffN'].sum() ).round(),
-        'part2Self': sessionData.loc[part2rowSel,'randPayoffS'].sum().round(),
-        'part2Charity': sessionData.loc[part2rowSel,'randPayoffC'].sum().round(),
+        'part1Self': ( sessionData.loc[part1rowSel,'randPayoffS'].sum() / sessionData.loc[part1rowSel,'randPayoffN'].sum() ).round().astype(int),
+        'part1Charity': ( sessionData.loc[part1rowSel,'randPayoffC'].sum() / sessionData.loc[part1rowSel,'randPayoffN'].sum() ).round().astype(int),
+        'part2Self': sessionData.loc[part2rowSel,'randPayoffS'].sum().round().astype(int),
+        'part2Charity': sessionData.loc[part2rowSel,'randPayoffC'].sum().round().astype(int),
         'selectedCharity': sessionData.loc[sessionData.sessionID==1,'charity'].values[0]
     }
     kwargs['finalSelf'] = kwargs['part1Self']+kwargs['part2Self']
     kwargs['finalCharity'] = kwargs['part1Charity']+kwargs['part2Charity']
     kwargsDF = pd.DataFrame(kwargs,index=[0])
+    payoutTable = os.path.join('data','csv',folder,'payoutDisplay.csv')
     if os.path.isfile(payoutTable):
         kwargsDF.to_csv(payoutTable,append=True,index=False)
     else:
