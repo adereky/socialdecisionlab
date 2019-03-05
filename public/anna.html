@@ -174,8 +174,9 @@
               }
               var randTrial1 = trials[rand1]
               var randTrial2 = trials[rand2]
+              var conversionRate = parseFloat(jsPsych.data.getURLVariable('cr')) || 5.0;
+              Experiment.session.conversionRate = conversionRate;
               if(typeof randTrial1 != 'undefined'){
-                var conversionRate = parseFloat(jsPsych.data.getURLVariable('cr')) || 5.0;
                 Experiment.session.randPayoff1_IDX = randTrial1.trial_index;
                 Experiment.session.randPayoff2_IDX = randTrial2.trial_index;
                 Experiment.session.randPayoffS1_CHF = randTrial1.payoffS / conversionRate;
@@ -210,7 +211,7 @@
             var header = '';
             var dataStr = '';
             var info = Experiment.session;
-            
+
             for (i=0;i<keys.length;i++){
               var t = typeof info[keys[i]] == 'object' ? info[keys[i]].join('') : info[keys[i]];
               header= i>0 ? header+','+keys[i] : keys[i];

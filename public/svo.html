@@ -127,6 +127,7 @@
           var randTrial1 = trials[rand1]
           var randTrial2 = trials[rand2]
           var conversionRate = parseFloat(jsPsych.data.getURLVariable('cr')) || 5.0;
+          Experiment.session.conversionRate = conversionRate;
           Experiment.session.randPayoff1_IDX = randTrial1.trial_index;
           Experiment.session.randPayoff2_IDX = randTrial2.trial_index;
           Experiment.session.randPayoffS1_CHF = randTrial1.payoffS/conversionRate;
