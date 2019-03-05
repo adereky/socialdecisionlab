@@ -159,7 +159,7 @@
 
           function getSessionDataAsCSV(){
             if(Experiment.session.sessionID<5){
-              var trials = jsPsych.data.getData().filter(function(i){return(i.trial_type=='anna')})
+              var trials = jsPsych.data.getData().filter(function(i){return(i.trial_type=='anna' & 'payoffS' in i)})
               if(Experiment.session.sessionID==1){
                 if(trials.length>80){
                   var rand1 = Math.floor(Math.random()*(trials.length-70))+70
@@ -175,26 +175,42 @@
               var randTrial1 = trials[rand1]
               var randTrial2 = trials[rand2]
               if(typeof randTrial1 != 'undefined'){
-                var conversionRate = 5.0
-                Experiment.session.randPayoffS_CHF = ((randTrial1.payoffS+randTrial2.payoffS)/2.0)/ conversionRate
-                Experiment.session.randPayoffC_CHF = ((randTrial1.payoffC+randTrial2.payoffC)/2.0)/ conversionRate
+                var conversionRate = parseFloat(jsPsych.data.getURLVariable('cr')) || 5.0;
+                Experiment.session.randPayoff1_IDX = randTrial1.trial_index;
+                Experiment.session.randPayoff2_IDX = randTrial2.trial_index;
+                Experiment.session.randPayoffS1_CHF = randTrial1.payoffS / conversionRate;
+                Experiment.session.randPayoffC1_CHF = randTrial1.payoffC / conversionRate;
+                Experiment.session.randPayoffS2_CHF = randTrial2.payoffS / conversionRate;
+                Experiment.session.randPayoffC2_CHF = randTrial2.payoffC / conversionRate;
               }else{
-                Experiment.session.randPayoffS_CHF = NaN
-                Experiment.session.randPayoffC_CHF = NaN
+                Experiment.session.randPayoff1_IDX = NaN;
+                Experiment.session.randPayoff2_IDX = NaN;
+                Experiment.session.randPayoffS1_CHF = NaN;
+                Experiment.session.randPayoffS2_CHF = NaN;
+                Experiment.session.randPayoffC1_CHF = NaN;
+                Experiment.session.randPayoffC2_CHF = NaN;
               }
             }else if(Experiment.session.sessionID==5){
-              Experiment.session.randPayoffS_CHF = 5
-              Experiment.session.randPayoffC_CHF = 5
+              Experiment.session.randPayoff1_IDX = NaN;
+              Experiment.session.randPayoff2_IDX = NaN;
+              Experiment.session.randPayoffS1_CHF = 5;
+              Experiment.session.randPayoffC1_CHF = 5;
+              Experiment.session.randPayoffS2_CHF = NaN;
+              Experiment.session.randPayoffC2_CHF = NaN;
             }else{
-              Experiment.session.randPayoffS_CHF = NaN
-              Experiment.session.randPayoffC_CHF = NaN
+              Experiment.session.randPayoff1_IDX = NaN;
+              Experiment.session.randPayoff2_IDX = NaN;
+              Experiment.session.randPayoffS1_CHF = NaN;
+              Experiment.session.randPayoffS2_CHF = NaN;
+              Experiment.session.randPayoffC1_CHF = NaN;
+              Experiment.session.randPayoffC2_CHF = NaN;
             };
 
             var keys = Object.keys(Experiment.session);
             var header = '';
             var dataStr = '';
             var info = Experiment.session;
-
+            
             for (i=0;i<keys.length;i++){
               var t = typeof info[keys[i]] == 'object' ? info[keys[i]].join('') : info[keys[i]];
               header= i>0 ? header+','+keys[i] : keys[i];
