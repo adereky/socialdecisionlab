@@ -10,10 +10,9 @@
   <p>Mefirst:* <input id="mefirstinput"></input></p>
   <p>Session:* <input id="sessioninput"></input></p>
   <p>Folder: <input id="folderinput"></input></p>
-  <p>Response ID: <input id="responseinput"></input></p>
   <p>User ID: <input id="userinput"></input></p>
   <p>Charity: <input id="charityinput"></input></p>
-  <p>Notification Email: <input id="notificationinput"></input></p>
+  <p>Conversion rate: <input id="conversioninput"></input></p>
   <p>nTrials: <input id="ntrialsinput"></input></p>
 </div>
 <div>
@@ -55,7 +54,7 @@ function getLink(opts){
   'i='+input[6]+'&'+
   'ch='+input[7];
   if(input[8]!='default'){
-    url = url+'&n='+input[8];
+    url = url+'&cr='+input[8];
   };
   if(input[9]!='default'){
     url = url+'&nTrials='+input[9];
