@@ -101,7 +101,9 @@ def send_payout():
         'part1Charity': ( sessionData.loc[part1rowSel,'randPayoffC'].sum() / sessionData.loc[part1rowSel,'randPayoffN'].sum() ).round().astype(int),
         'part2Self': sessionData.loc[part2rowSel,'randPayoffS'].sum().round().astype(int),
         'part2Charity': sessionData.loc[part2rowSel,'randPayoffC'].sum().round().astype(int),
-        'selectedCharity': sessionData.loc[sessionData.sessionID==1,'charity'].values[0]
+        'selectedCharity': sessionData.loc[sessionData.sessionID==1,'charity'].values[0],
+        'conversionRate': sessionData.loc[sessionData.sessionID==1,'conversionRate'].values[0],
+        'timestamp' : str(pd.Timestamp.now())
     }
     kwargs['finalSelf'] = kwargs['part1Self']+kwargs['part2Self']
     kwargs['finalCharity'] = kwargs['part1Charity']+kwargs['part2Charity']
