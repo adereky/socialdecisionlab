@@ -7,7 +7,7 @@ jsPsych.plugins["anna"] = (function() {
 
 			var interTrialInterval = 1000;
 			var interResponseInterval = 500;
-			var maxFirstResponse = 5000;
+			var maxFirstResponse = 3500;
 
 			var env = {
 			      screenW: screen.width,
