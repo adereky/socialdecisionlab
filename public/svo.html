@@ -129,11 +129,11 @@
           var conversionRate = parseFloat(jsPsych.data.getURLVariable('cr')) || 5.0;
           Experiment.session.conversionRate = conversionRate;
           Experiment.session.randPayoff1_IDX = randTrial1.trial_index;
-          Experiment.session.randPayoff2_IDX = randTrial2.trial_index;
+          Experiment.session.randPayoff2_IDX = 'NaN';
           Experiment.session.randPayoffS1_CHF = randTrial1.payoffS/conversionRate;
           Experiment.session.randPayoffC1_CHF = randTrial1.payoffC/conversionRate;
-          Experiment.session.randPayoffS2_CHF = randTrial2.payoffS/conversionRate;
-          Experiment.session.randPayoffC2_CHF = randTrial2.payoffC/conversionRate;
+          Experiment.session.randPayoffS2_CHF = 'NaN';
+          Experiment.session.randPayoffC2_CHF = 'NaN';
 
 
           function getSessionAsCSV(){
