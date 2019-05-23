@@ -7,7 +7,8 @@ jsPsych.plugins["anna"] = (function() {
 
 			var interTrialInterval = 1000;
 			var interResponseInterval = 500;
-			var maxFirstResponse = 3500;
+			var maxFirstResponseSingleStimuli = 3500;
+			var maxFirstResponseDoubleStimuli = 5500;
 
 			var env = {
 			      screenW: screen.width,
@@ -260,7 +261,8 @@ jsPsych.plugins["anna"] = (function() {
 			displayStimuli.init();
 
 			if(trial.sessionNr == 4){
-				timeOutHandlers.push(setTimeout(end_trial,maxFirstResponse));
+				var timeout_ms = trial.condition.length==2  ? maxFirstResponseDoubleStimuli : maxFirstResponseSingleStimuli;
+				timeOutHandlers.push(setTimeout(end_trial,timeout_ms));
 			};
 
 			// start the response listener
